@@ -3,7 +3,7 @@ package
 	import feathers.controls.Header;
 	import feathers.controls.Check;
 	import feathers.controls.Screen;
-    import feathers.controls.TextArea;
+    import feathers.controls.TextInput;
     import feathers.themes.MetalWorksMobileTheme;
 	import starling.core.Starling;
 	import starling.display.MovieClip;
@@ -22,11 +22,8 @@ package
 		private var _header:Header;
 		private var _theme:MetalWorksMobileTheme;
 
-		private var vertexSource:TextField;
-		private var fragmentSource:TextField;
-
-        private var vertexSource2:TextArea;
-        private var fragmentSource2:TextArea;
+		private var vertexSource:TextInput;
+		private var fragmentSource:TextInput;
 
 
 		// Texture Atlas
@@ -72,78 +69,51 @@ package
 			sourceCheck = new Check();
 			sourceCheck.label = "Display Source";
 			sourceCheck.addEventListener(Event.TRIGGERED, sourceCheck_triggeredHandler);
-			addChild(sourceCheck);
+            addChild(sourceCheck);
+            sourceCheck.isSelected = true;
 
 			var frames:Vector.<Texture> = getTextureAtlas().getTextures("flight");
-            mMovie = new MovieClip(frames, 15);
-
-			mMovie.x = (stage.stageWidth/2) - int(mMovie.width / 2);
-			mMovie.y = (stage.stageHeight/2) - int(mMovie.height / 2);
+            mMovie = new MovieClip(frames, 24);
 			addChild(mMovie);
-
 			mMovie.filter = glslfilter;
 
 			Starling.juggler.add(mMovie);
 
-            vertexSource2 = new TextArea();
-            addChild(vertexSource2);
-            vertexSource2.text = "vertexSource2";
-            vertexSource2.x = 0;
-            vertexSource2.y = 100;
-
-            fragmentSource2 = new TextArea();
-            addChild(fragmentSource2);
-            fragmentSource2.text = "fragmentSource2";
-            fragmentSource2.x = 400;
-            fragmentSource2.y = 100;
-
-			vertexSource = new TextField();
-			Starling.current.nativeOverlay.addChild(vertexSource);
-
-			vertexSource.visible = false;
-			vertexSource.wordWrap = true;
-			vertexSource.multiline = true;
-			vertexSource.type = TextFieldType.INPUT;
+			vertexSource = new TextInput();
+			vertexSource.visible = sourceCheck.isSelected;
+			vertexSource.isEditable = true;
 			vertexSource.addEventListener(Event.CHANGE, vertexSourceChanged);
+            addChild(vertexSource);
 
-			fragmentSource = new TextField();
-			Starling.current.nativeOverlay.addChild(fragmentSource);
-			fragmentSource.visible = false;
-			fragmentSource.wordWrap = true;
-			fragmentSource.multiline = true;
-			fragmentSource.type = TextFieldType.INPUT;
+			fragmentSource = new TextInput();
+			fragmentSource.visible = sourceCheck.isSelected;
+			fragmentSource.isEditable = true;
 			fragmentSource.addEventListener(Event.CHANGE, fragmentSourceChanged);
+            addChild(fragmentSource);
 
 			vertexSource.text = <![CDATA[
-				varying vec2 TexCoords;
-
-				void main()
-				{
-					TexCoords = gl_MultiTexCoord0.xy;
-					gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xy, 0, 0);
-				}
-			]]>;
+varying vec2 TexCoords;
+void main() {
+TexCoords = gl_MultiTexCoord0.xy;
+gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xy, 0, 0);
+}
+]]>;
 
 			fragmentSource.text =  <![CDATA[
-				varying vec2 TexCoords;
-
-				uniform sampler2D baseTexture;
-				uniform float time;
-
-				vec2 wobbleTexCoords(in vec2 tc)
-				{
-					tc.x += (sin(tc.x*10.0 + time*10.0)*0.05);
-					tc.y -= (cos(tc.y*10.0 + time*10.0)*0.05);
-					return tc;
-				}
-
-				void main()
-				{
-					vec2 tc = wobbleTexCoords(TexCoords);
-					vec4 oc = texture2D(baseTexture, tc);
-					gl_FragColor = oc;
-				}
-			]]>;
+varying vec2 TexCoords;
+uniform sampler2D baseTexture;
+uniform float time;
+vec2 wobbleTexCoords(in vec2 tc) {
+tc.x += (sin(tc.x*10.0 + time*10.0)*0.05);
+tc.y -= (cos(tc.y*10.0 + time*10.0)*0.05);
+return tc;
+}
+void main() {
+vec2 tc = wobbleTexCoords(TexCoords);
+vec4 oc = texture2D(baseTexture, tc);
+gl_FragColor = oc;
+}
+]]>;
 
 			recompile();
         }
@@ -179,14 +149,17 @@ package
 
 			vertexSource.y = sourceCheck.y + sourceCheck.height + 5;
 
-			var h:int = stage.stageHeight - vertexSource.y;
+			var h:int = stage.stageHeight - vertexSource.y - 10;
 
-			vertexSource.width = stage.stageWidth/2;
-			vertexSource.height = h/2;
+			vertexSource.width = stage.stageWidth * 0.5;
+			vertexSource.height = h * 0.5;
 
-			fragmentSource.y = vertexSource.y + (h/2);
-			fragmentSource.width = stage.stageWidth/2;
-			fragmentSource.height = h/2;
+			fragmentSource.y = vertexSource.y + (h * 0.5) + 10;
+			fragmentSource.width = stage.stageWidth * 0.5;
+			fragmentSource.height = h * 0.5;
+
+            mMovie.x = (stage.stageWidth * 0.5);
+            mMovie.y = (stage.stageHeight * 0.5) - 200;
 		}
 	}
 }

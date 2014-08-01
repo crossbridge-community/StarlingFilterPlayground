@@ -1,11 +1,13 @@
 package {
+import feathers.system.DeviceCapabilities;
+
 import flash.display.*;
 import flash.events.*;
 import flash.geom.Rectangle;
 
 import starling.core.Starling;
 
-[SWF(width="800", height="600", frameRate="60", backgroundColor="#333333")]
+[SWF(width="800", height="600", frameRate="60", backgroundColor="#000000")]
 public class StarlingFilterPlayground extends Sprite {
     private var _starling:Starling;
 
@@ -14,6 +16,10 @@ public class StarlingFilterPlayground extends Sprite {
     }
 
     public function onAdded(e:Event):void {
+        DeviceCapabilities.dpi = 130;
+        DeviceCapabilities.screenPixelWidth = 800;
+        DeviceCapabilities.screenPixelHeight = 600;
+
         removeEventListener(Event.ADDED_TO_STAGE, onAdded);
         this.stage.scaleMode = StageScaleMode.NO_SCALE;
         this.stage.align = StageAlign.TOP_LEFT;
