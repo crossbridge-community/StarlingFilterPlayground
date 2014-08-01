@@ -100,6 +100,7 @@ import starling.textures.TextureAtlas;
             exportButton.y = _header.height;
             addChild(exportButton);
             exportButton.validate();
+            exportButton.visible = false;
             //
 			vertexSource = new TextInput();
 			vertexSource.visible = sourceCheck.isSelected;
@@ -179,8 +180,8 @@ gl_FragColor = oc;
 
         private function exportCheck_triggeredHandler(event:Event):void
         {
-            Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, glslfilter.toShaderString());
-            alert = Alert.show("Shader exported to Clipboard", "EXPORT", new ListCollection([{label:"OK"}]));
+            //Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, glslfilter.toShaderString());
+            //alert = Alert.show("Shader exported to Clipboard", "EXPORT", new ListCollection([{label:"OK"}]));
         }
 
 		override protected function draw():void
