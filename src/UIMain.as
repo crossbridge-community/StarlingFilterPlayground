@@ -1,17 +1,12 @@
 package
 {
 	import feathers.controls.Header;
-	import feathers.controls.List;
-	import feathers.controls.Label;
 	import feathers.controls.Check;
 	import feathers.controls.Screen;
-	import feathers.controls.Callout;
-	import feathers.data.ListCollection;
-	import feathers.skins.StandardIcons;
-	import feathers.themes.MetalWorksMobileTheme;
+    import feathers.controls.TextArea;
+    import feathers.themes.MetalWorksMobileTheme;
 	import starling.core.Starling;
 	import starling.display.MovieClip;
-	import starling.display.DisplayObject;
 	import starling.events.Event;
 	import starling.filters.GLSLFilter;
 	import starling.textures.Texture;
@@ -19,7 +14,6 @@ package
 
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
-	import flash.events.TextEvent;
 
 	[Event(name="complete",type="starling.events.Event")]
 
@@ -31,12 +25,16 @@ package
 		private var vertexSource:TextField;
 		private var fragmentSource:TextField;
 
+        private var vertexSource2:TextArea;
+        private var fragmentSource2:TextArea;
+
+
 		// Texture Atlas
-        
-        [Embed(source="assets/bird_atlas.xml", mimeType="application/octet-stream")]
+
+        [Embed(source="/../assets/bird_atlas.xml", mimeType="application/octet-stream")]
         public static const AtlasXml:Class;
-        
-        [Embed(source="assets/bird_atlas.png")]
+
+        [Embed(source="/../assets/bird_atlas.png")]
         public static const AtlasTexture:Class;
 
         private static var sTextureAtlas:TextureAtlas;
@@ -55,7 +53,7 @@ package
                 var xml:XML = XML(new AtlasXml());
                 sTextureAtlas = new TextureAtlas(texture, xml);
             }
-            
+
             return sTextureAtlas;
         }
 
@@ -87,12 +85,23 @@ package
 
 			Starling.juggler.add(mMovie);
 
+            vertexSource2 = new TextArea();
+            addChild(vertexSource2);
+            vertexSource2.text = "vertexSource2";
+            vertexSource2.x = 0;
+            vertexSource2.y = 100;
+
+            fragmentSource2 = new TextArea();
+            addChild(fragmentSource2);
+            fragmentSource2.text = "fragmentSource2";
+            fragmentSource2.x = 400;
+            fragmentSource2.y = 100;
 
 			vertexSource = new TextField();
 			Starling.current.nativeOverlay.addChild(vertexSource);
-			
+
 			vertexSource.visible = false;
-			vertexSource.wordWrap = true; 
+			vertexSource.wordWrap = true;
 			vertexSource.multiline = true;
 			vertexSource.type = TextFieldType.INPUT;
 			vertexSource.addEventListener(Event.CHANGE, vertexSourceChanged);
@@ -100,14 +109,14 @@ package
 			fragmentSource = new TextField();
 			Starling.current.nativeOverlay.addChild(fragmentSource);
 			fragmentSource.visible = false;
-			fragmentSource.wordWrap = true; 
+			fragmentSource.wordWrap = true;
 			fragmentSource.multiline = true;
 			fragmentSource.type = TextFieldType.INPUT;
 			fragmentSource.addEventListener(Event.CHANGE, fragmentSourceChanged);
 
 			vertexSource.text = <![CDATA[
 				varying vec2 TexCoords;
-				
+
 				void main()
 				{
 					TexCoords = gl_MultiTexCoord0.xy;
@@ -117,23 +126,23 @@ package
 
 			fragmentSource.text =  <![CDATA[
 				varying vec2 TexCoords;
-				
+
 				uniform sampler2D baseTexture;
 				uniform float time;
-				
+
 				vec2 wobbleTexCoords(in vec2 tc)
 				{
 					tc.x += (sin(tc.x*10.0 + time*10.0)*0.05);
-					tc.y -= (cos(tc.y*10.0 + time*10.0)*0.05); 
+					tc.y -= (cos(tc.y*10.0 + time*10.0)*0.05);
 					return tc;
 				}
-				
+
 				void main()
 				{
 					vec2 tc = wobbleTexCoords(TexCoords);
 					vec4 oc = texture2D(baseTexture, tc);
 					gl_FragColor = oc;
-				}		
+				}
 			]]>;
 
 			recompile();
@@ -159,7 +168,7 @@ package
 		{
 			recompile();
 		}
-		
+
 		override protected function draw():void
 		{
 			_header.width = actualWidth;
