@@ -1,11 +1,18 @@
 package
 {
-	import feathers.controls.Header;
+import feathers.controls.Alert;
+import feathers.controls.Button;
+import feathers.controls.Header;
 	import feathers.controls.Check;
 	import feathers.controls.Screen;
     import feathers.controls.TextInput;
-    import feathers.themes.MetalWorksMobileTheme;
-	import starling.core.Starling;
+import feathers.data.ListCollection;
+import feathers.themes.MetalWorksMobileTheme;
+
+import flash.desktop.Clipboard;
+import flash.desktop.ClipboardFormats;
+
+import starling.core.Starling;
 	import starling.display.MovieClip;
 	import starling.events.Event;
 	import starling.filters.GLSLFilter;
@@ -39,6 +46,9 @@ package
         private var mMovie:MovieClip;
 
         private var sourceCheck:Check;
+        private var exportCheck:Button;
+
+        private var alert:Alert;
 
         private var glslfilter:GLSLFilter = new GLSLFilter()
 
@@ -72,12 +82,21 @@ package
             addChild(sourceCheck);
             sourceCheck.isSelected = true;
 
+            exportCheck = new Button();
+            exportCheck.label = "Export Target";
+            exportCheck.addEventListener(Event.TRIGGERED, exportCheck_triggeredHandler);
+            addChild(exportCheck);
+            exportCheck.isSelected = !sourceCheck.isSelected;
+
 			var frames:Vector.<Texture> = getTextureAtlas().getTextures("flight");
             mMovie = new MovieClip(frames, 24);
 			addChild(mMovie);
 			mMovie.filter = glslfilter;
+            glslfilter.errorHandler = onFilterError;
 
 			Starling.juggler.add(mMovie);
+
+            //var exportButton:Button = new Button();
 
 			vertexSource = new TextInput();
 			vertexSource.visible = sourceCheck.isSelected;
@@ -118,6 +137,12 @@ gl_FragColor = oc;
 			recompile();
         }
 
+        private function onFilterError(error:Error):void
+        {
+            trace(this, "onFilterError", error);
+            alert = Alert.show(error.toString(), "SHADER ERROR", new ListCollection([{label:"OK"}]));
+        }
+
         private function recompile():void
         {
 			glslfilter.update(vertexSource.text, fragmentSource.text);
@@ -128,6 +153,13 @@ gl_FragColor = oc;
 			vertexSource.visible = !vertexSource.visible;
 			fragmentSource.visible = !fragmentSource.visible;
 		}
+
+        private function exportCheck_triggeredHandler(event:Event):void
+        {
+            var data:String = 'FRAGMENT SHADER:\n' + glslfilter.compiledFragmentShaderExport + '\nVERTEX SHADER:\n' + glslfilter.compiledVertexShaderExport;
+            Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, data);
+            alert = Alert.show("Shader exported to Clipboard", "EXPORT", new ListCollection([{label:"OK"}]));
+        }
 
 		private function vertexSourceChanged(e:*):void
 		{
@@ -144,8 +176,12 @@ gl_FragColor = oc;
 			_header.width = actualWidth;
 			_header.validate();
 
-			sourceCheck.y = _header.height + 5
+			sourceCheck.y = _header.height + 5;
 			sourceCheck.validate();
+
+            exportCheck.x = sourceCheck.x + sourceCheck.width + 15;
+            exportCheck.y = _header.height;
+            exportCheck.validate();
 
 			vertexSource.y = sourceCheck.y + sourceCheck.height + 5;
 
