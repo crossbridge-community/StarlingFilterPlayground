@@ -21,16 +21,35 @@ import starling.core.Starling;
 import starling.textures.Texture;
 
 public class GLSLFilter extends FragmentFilter {
+    //----------------------------------
+    //  Static
+    //----------------------------------
+
     private static var glsl2agalInitialized:Boolean = false;
+
+    //----------------------------------
+    //  Private
+    //----------------------------------
+
     private var mShaderProgram:Program3D;
-    private var vs:String, fs:String;
+    private var vs:String
+    private var fs:String;
     private var timeIdx:int = -1;
+    private var tmpVec:Vector.<Number> = new Vector.<Number>(4);
+
+    //----------------------------------
+    //  Public
+    //----------------------------------
 
     public var errorHandler:Function;
     public var compiledVertexShader:Object;
     public var compiledFragmentShader:Object;
     public var compiledVertexShaderExport:String;
     public var compiledFragmentShaderExport:String;
+
+    //----------------------------------
+    //  Constructor
+    //----------------------------------
 
     public function GLSLFilter() {
         super();
@@ -41,10 +60,35 @@ public class GLSLFilter extends FragmentFilter {
         }
     }
 
+    //----------------------------------
+    //  API
+    //----------------------------------
+
     public override function dispose():void {
         if (mShaderProgram) mShaderProgram.dispose();
         super.dispose();
     }
+
+    public function update(_vs:String, _fs:String):void {
+        trace(this, "update");
+        this.vs = _vs;
+        this.fs = _fs;
+        createPrograms();
+    }
+
+    public function load(_vs:Object, _fs:Object):void {
+        trace(this, "load");
+        compiledVertexShader = _vs;
+        compiledFragmentShader = _fs;
+    }
+
+    public function toShaderString():String {
+        return compiledFragmentShaderExport + "\n${NEWFILE}\n" + compiledVertexShaderExport;
+    }
+
+    //----------------------------------
+    //  Protected
+    //----------------------------------
 
     protected override function createPrograms():void {
         if (vs && fs) {
@@ -101,15 +145,6 @@ public class GLSLFilter extends FragmentFilter {
         timeIdx = -1;
         mShaderProgram = assembleAgal();
     }
-
-    public function update(_vs:String, _fs:String):void {
-        trace(this, "update");
-        this.vs = _vs;
-        this.fs = _fs;
-        createPrograms();
-    }
-
-    private var tmpVec:Vector.<Number> = new Vector.<Number>(4);
 
     protected override function activate(pass:int, context:Context3D, texture:Texture):void {
         // already set by super class:
