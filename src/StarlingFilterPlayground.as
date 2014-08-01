@@ -14,12 +14,12 @@ package
 
         public function StarlingFilterPlayground()
         {
-            addEventListener(Event.ADDED_TO_START, onAdded, false, 0, true);
+            addEventListener(Event.ADDED_TO_STAGE, onAdded, false, 0, true);
         }
 
         public function onAdded(e:Event):void
         {
-            removeEventListener(Event.ADDED_TO_START, onAdded);
+            removeEventListener(Event.ADDED_TO_STAGE, onAdded);
             this.stage.scaleMode = StageScaleMode.NO_SCALE;
             this.stage.align = StageAlign.TOP_LEFT;
             Starling.handleLostContext = true;
